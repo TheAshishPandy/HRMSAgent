@@ -26,8 +26,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     from app.modules.auth.router import router as auth_router
+    from app.modules.jobs.router import router as jobs_router
 
     app.include_router(auth_router)
+    app.include_router(jobs_router)
     return app
 
 
