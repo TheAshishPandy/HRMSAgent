@@ -25,6 +25,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    from app.modules.auth.router import router as auth_router
+
+    app.include_router(auth_router)
     return app
 
 
