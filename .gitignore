@@ -156,6 +156,11 @@
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
 
+data/
+backend/data/
+backend/.env
+frontend/dist/
+
 # Compressed files
 *.zip
 *.rar
