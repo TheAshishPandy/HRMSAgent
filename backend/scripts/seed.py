@@ -11,7 +11,8 @@ if not os.environ.get("DATA_ENCRYPTION_KEY"):
 from app.config import get_settings
 get_settings.cache_clear()
 
-from app.db import Base, init_engine, SessionLocal
+from app import db as dbmod
+from app.db import Base, init_engine
 from app import models  # noqa: F401
 from app.models import User, Job, Application, Interview, Message
 from app.modules.auth.service import register
@@ -25,7 +26,7 @@ def main():
     Path("data/resumes").mkdir(parents=True, exist_ok=True)
     engine = init_engine()
     Base.metadata.create_all(engine)
-    db = SessionLocal()
+    db = dbmod.SessionLocal()
     if db.query(User).filter(User.role == "hr").first():
         print("already seeded")
         return
