@@ -26,4 +26,15 @@ def login_user(body: schemas.LoginIn, db: Session = Depends(get_db)):
 
 @router.get("/me")
 def me(user: User = Depends(get_current_user)):
-    return user_public(user)
+    from app.config import get_settings
+
+    s = get_settings()
+    data = user_public(user)
+    data["timezone"] = user.timezone
+    data["integrations"] = {
+        "smtp_configured": bool(s.smtp_host),
+        "google_configured": bool(s.google_client_id and s.google_client_secret),
+        "llm_configured": bool(s.user_llm_api_key),
+        "google_connected": bool(user.google_refresh_token_enc),
+    }
+    return data

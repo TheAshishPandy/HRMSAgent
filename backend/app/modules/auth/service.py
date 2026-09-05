@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from passlib.context import CryptContext
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -58,7 +59,12 @@ def register(db: Session, email: str, password: str, name: str, role: str) -> Us
         timezone="UTC",
     )
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        from fastapi import HTTPException
+        raise HTTPException(status_code=409, detail={"code": "duplicate_email", "message": "Email already registered"})
     db.refresh(user)
     return user
 

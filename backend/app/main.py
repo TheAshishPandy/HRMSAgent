@@ -27,9 +27,19 @@ def create_app() -> FastAPI:
     )
     from app.modules.auth.router import router as auth_router
     from app.modules.jobs.router import router as jobs_router
+    from app.modules.candidates.router import apps_router, jobs_apply, me_router
+    from app.modules.calendar.router import router as calendar_router
+    from app.modules.mail.router import router as mail_router
+    from app.modules.feedback.router import router as feedback_router
 
     app.include_router(auth_router)
     app.include_router(jobs_router)
+    app.include_router(jobs_apply)
+    app.include_router(apps_router)
+    app.include_router(me_router)
+    app.include_router(calendar_router)
+    app.include_router(mail_router)
+    app.include_router(feedback_router)
     return app
 
 

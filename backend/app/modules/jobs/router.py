@@ -48,6 +48,21 @@ def list_jobs(
     return [serialize_job(j, hr=hr) for j in jobs]
 
 
+@router.get("/{job_id}")
+def get_one(
+    job_id: str,
+    user: User | None = Depends(_optional_user),
+    db: Session = Depends(get_db),
+):
+    job = service.get_job(db, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    hr = _is_hr(user)
+    if not hr and job.status != "open":
+        raise HTTPException(status_code=404, detail="Job not found")
+    return serialize_job(job, hr=hr)
+
+
 @router.patch("/{job_id}")
 def patch_job(
     job_id: str,

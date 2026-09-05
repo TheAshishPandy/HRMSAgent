@@ -1,0 +1,153 @@
+:root {
+  --ink: #1c1917;
+  --ink-soft: #44403c;
+  --paper: #f6f1e8;
+  --paper-2: #fffdf8;
+  --line: #e7dfd3;
+  --terra: #b4532a;
+  --terra-dark: #9a3f1b;
+  --sage: #3f6b4f;
+  --gold: #c4a574;
+  --danger: #9f1239;
+  --shadow: 0 12px 40px rgba(28, 25, 23, 0.08);
+  --radius: 14px;
+  --sans: "Source Sans 3", "Segoe UI", sans-serif;
+  --serif: "Fraunces", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { min-height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+  font-size: 16px;
+}
+a { color: var(--terra-dark); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 650; letter-spacing: -0.02em; margin: 0 0 0.4em; }
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-2);
+  cursor: pointer;
+  font-weight: 600;
+}
+button.secondary {
+  background: transparent;
+  color: var(--ink);
+}
+button.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+button.danger { background: var(--danger); border-color: var(--danger); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+input, select, textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-2);
+}
+label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--ink-soft); }
+.field { margin-bottom: 14px; }
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+.nav {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 28px 20px;
+}
+.nav a { color: #e7dfd3; display: block; padding: 10px 8px; border-radius: 8px; }
+.nav a.router-link-active { background: rgba(255,255,255,0.08); color: #fff; text-decoration: none; }
+.brand {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  color: #fff;
+  display: block;
+  margin-bottom: 28px;
+}
+.main { padding: 32px 40px 80px; }
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.grid { display: grid; gap: 16px; }
+.grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.stat { padding: 18px; }
+.stat .n { font-family: var(--serif); font-size: 2rem; }
+.muted { color: var(--ink-soft); }
+.banner {
+  background: #fde68a;
+  border: 1px solid #fbbf24;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.error { color: var(--danger); font-size: 0.9rem; margin-top: 6px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #efe7da;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+}
+.col {
+  background: #efe7da;
+  border-radius: 12px;
+  padding: 10px;
+  min-height: 240px;
+}
+.col h3 { font-size: 0.95rem; }
+.app-card {
+  background: var(--paper-2);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+}
+.slot.off { opacity: 0.4; pointer-events: none; }
+.auth-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.auth-card { width: min(420px, 100%); }
+.md { white-space: pre-wrap; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px; }
+  .brand { margin: 0 12px 0 0; }
+  .grid.cols-4, .grid.cols-2, .board { grid-template-columns: 1fr; }
+  .main { padding: 20px 16px 60px; }
+}
