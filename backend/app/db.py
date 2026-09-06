@@ -21,6 +21,22 @@ SessionLocal = None
 engine = None
 
 
+def migrate_sqlite(engine):
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    tables = set(insp.get_table_names())
+    with engine.begin() as conn:
+        if "users" in tables:
+            cols = {c["name"] for c in insp.get_columns("users")}
+            if "organization_id" not in cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN organization_id VARCHAR(36)"))
+        if "jobs" in tables:
+            cols = {c["name"] for c in insp.get_columns("jobs")}
+            if "organization_id" not in cols:
+                conn.execute(text("ALTER TABLE jobs ADD COLUMN organization_id VARCHAR(36)"))
+
+
 def init_engine():
     global SessionLocal, engine
     engine = make_engine()

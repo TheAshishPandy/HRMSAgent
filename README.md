@@ -1,6 +1,6 @@
-# Northstar ATS
+# Northstar HRMS
 
-Local applicant tracking system: jobs, resume screening, weekday interviews, in-app inbox, optional SMTP / Google Calendar / LLM ranking.
+Multi-tenant HR platform. Recruitment (ATS) is the first live module: jobs, resume screening, weekday interviews, in-app inbox, optional SMTP / Google Calendar / LLM ranking. Day 1 also includes organizations, super-admin, employees, and CSS theme tokens.
 
 ## Setup
 
@@ -26,7 +26,11 @@ Seed demo data (from `backend/`):
 PYTHONPATH=. python scripts/seed.py
 ```
 
-HR login: `hr@example.com` / `password`.
+Demo logins (password for all: `password`):
+
+- Super admin: `admin@example.com`
+- HR: `hr@example.com`
+- Candidates: `ada@example.com` and other seeded applicants
 
 Frontend:
 

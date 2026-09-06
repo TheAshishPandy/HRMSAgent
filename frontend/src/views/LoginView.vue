@@ -2,7 +2,7 @@
   <div class="auth-wrap">
     <div class="card auth-card">
       <h1>Sign in</h1>
-      <p class="muted">Northstar ATS</p>
+      <p class="muted">Northstar HRMS</p>
       <form @submit.prevent="submit">
         <div class="field">
           <label for="email">Email</label>
@@ -30,6 +30,7 @@ export default {
         const u = await login(this.email, this.password);
         const next = this.$route.query.next;
         if (next) this.$router.push(String(next));
+        else if (u.role === "super_admin") this.$router.push("/admin");
         else this.$router.push(u.role === "hr" ? "/hr" : "/me");
       } catch (e) {
         this.error = "Invalid email or password";

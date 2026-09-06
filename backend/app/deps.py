@@ -41,3 +41,15 @@ def require_hr(user: User = Depends(get_current_user)) -> User:
     if user.role != "hr":
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
+
+
+def require_super_admin(user: User = Depends(get_current_user)) -> User:
+    if user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return user
+
+
+def require_org_staff(user: User = Depends(get_current_user)) -> User:
+    if user.role not in ("hr", "super_admin"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return user

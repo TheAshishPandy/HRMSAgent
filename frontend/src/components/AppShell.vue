@@ -1,9 +1,13 @@
 <template>
   <div class="shell">
     <aside class="nav">
-      <router-link class="brand" :to="home">Northstar ATS</router-link>
-      <template v-if="isHr">
+      <router-link class="brand" :to="home">{{ brand }}</router-link>
+      <template v-if="isAdmin">
+        <router-link to="/admin">Organizations</router-link>
+      </template>
+      <template v-else-if="isHr">
         <router-link to="/hr">Dashboard</router-link>
+        <router-link to="/hr/employees">Employees</router-link>
         <router-link to="/hr/jobs">Jobs</router-link>
         <router-link to="/hr/calendar">Calendar</router-link>
         <router-link to="/hr/inbox">Inbox</router-link>
@@ -26,7 +30,9 @@ import { auth, logout } from "../stores/auth";
 export default {
   computed: {
     isHr() { return auth.user && auth.user.role === "hr"; },
-    home() { return this.isHr ? "/hr" : "/me"; },
+    isAdmin() { return auth.user && auth.user.role === "super_admin"; },
+    home() { return this.isAdmin ? "/admin" : this.isHr ? "/hr" : "/me"; },
+    brand() { return (auth.user && auth.user.organization && auth.user.organization.name) || "Northstar HRMS"; },
   },
   methods: {
     out() {

@@ -10,14 +10,17 @@ async def lifespan(app: FastAPI):
     from app.db import Base, init_engine
     from app import models  # noqa: F401
 
+    from app.db import migrate_sqlite
+
     engine = init_engine()
     Base.metadata.create_all(engine)
+    migrate_sqlite(engine)
     yield
 
 
 def create_app() -> FastAPI:
     get_settings()
-    app = FastAPI(title="ATS", lifespan=lifespan)
+    app = FastAPI(title="HRMS", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -31,6 +34,8 @@ def create_app() -> FastAPI:
     from app.modules.calendar.router import router as calendar_router
     from app.modules.mail.router import router as mail_router
     from app.modules.feedback.router import router as feedback_router
+    from app.modules.tenants.router import router as tenants_router
+    from app.modules.employees.router import router as employees_router
 
     app.include_router(auth_router)
     app.include_router(jobs_router)
@@ -40,6 +45,8 @@ def create_app() -> FastAPI:
     app.include_router(calendar_router)
     app.include_router(mail_router)
     app.include_router(feedback_router)
+    app.include_router(tenants_router)
+    app.include_router(employees_router)
     return app
 
 

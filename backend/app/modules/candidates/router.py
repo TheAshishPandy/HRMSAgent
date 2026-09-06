@@ -10,7 +10,7 @@ from app.crypto import decrypt_str, encrypt_str, hmac_email
 from app.db import get_db
 from app.deps import get_current_user, require_hr
 from app.errors import conflict
-from app.models import Application, Feedback, Interview, Job, Message, User
+from app.models import Application, Employee, Feedback, Interview, Job, Message, User
 from app.modules.audit import log_action
 from app.modules.candidates.schemas import OverrideIn, ParsedTextIn
 from app.modules.candidates.service import apply_to_job, serialize_application
@@ -83,6 +83,9 @@ def list_apps(job_id: str | None = None, user: User = Depends(get_current_user),
     q = db.query(Application)
     if user.role != "hr":
         q = q.filter(Application.candidate_id == user.id)
+    elif user.organization_id:
+        org_job_ids = [row[0] for row in db.query(Job.id).filter(Job.organization_id == user.organization_id).all()]
+        q = q.filter(Application.job_id.in_(org_job_ids or ["__none__"]))
     if job_id:
         q = q.filter(Application.job_id == job_id)
     rows = q.order_by(Application.created_at.desc()).all()
@@ -381,8 +384,19 @@ def hr_export(candidate_id: str, user: User = Depends(require_hr), db: Session =
 
 @me_router.get("/hr/dashboard")
 def hr_dashboard(user: User = Depends(require_hr), db: Session = Depends(get_db)):
-    jobs = db.query(Job).all()
-    apps = db.query(Application).all()
+    jobs_q = db.query(Job)
+    apps_q = db.query(Application)
+    emp_q = db.query(Employee)
+    if user.organization_id:
+        jobs_q = jobs_q.filter(Job.organization_id == user.organization_id)
+        emp_q = emp_q.filter(Employee.organization_id == user.organization_id)
+        job_ids = [row[0] for row in db.query(Job.id).filter(Job.organization_id == user.organization_id).all()]
+        if job_ids:
+            apps_q = apps_q.filter(Application.job_id.in_(job_ids))
+        else:
+            apps_q = apps_q.filter(Application.id == "__none__")
+    jobs = jobs_q.all()
+    apps = apps_q.all()
     counts = defaultdict(int)
     for a in apps:
         counts[a.status] += 1
@@ -402,6 +416,7 @@ def hr_dashboard(user: User = Depends(require_hr), db: Session = Depends(get_db)
     )
     return {
         "open_jobs": sum(1 for j in jobs if j.status == "open"),
+        "employees": emp_q.count(),
         "pipeline": dict(counts),
         "upcoming_interviews": upcoming,
         "unread": unread,

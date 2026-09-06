@@ -74,12 +74,15 @@ def serialize_job(job: Job, hr: bool) -> dict:
             out[k] = val.isoformat()
         else:
             out[k] = val
+    if hr:
+        out["organization_id"] = job.organization_id
     return out
 
 
-def create_job(db: Session, user_id: str, data: dict) -> Job:
+def create_job(db: Session, user_id: str, data: dict, organization_id: str | None = None) -> Job:
     job = Job(
         created_by=user_id,
+        organization_id=organization_id,
         title=data["title"],
         team=data["team"],
         location=data["location"],
@@ -101,10 +104,12 @@ def create_job(db: Session, user_id: str, data: dict) -> Job:
     return job
 
 
-def list_jobs(db: Session, hr: bool) -> list[Job]:
+def list_jobs(db: Session, hr: bool, organization_id: str | None = None) -> list[Job]:
     q = db.query(Job)
     if not hr:
         q = q.filter(Job.status == "open")
+    elif organization_id:
+        q = q.filter(Job.organization_id == organization_id)
     return q.order_by(Job.created_at.desc()).all()
 
 

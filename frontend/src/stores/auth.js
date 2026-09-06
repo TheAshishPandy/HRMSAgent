@@ -1,5 +1,6 @@
 import { reactive } from "vue";
 import { api, getToken, setToken } from "../api";
+import { applyTheme } from "../theme";
 
 export const auth = reactive({
   token: getToken(),
@@ -13,6 +14,7 @@ export async function loadMe() {
   }
   try {
     auth.user = await api("/api/auth/me");
+    if (auth.user && auth.user.organization) applyTheme(auth.user.organization.theme);
     return auth.user;
   } catch {
     setToken("");
@@ -30,6 +32,7 @@ export async function login(email, password) {
   setToken(data.token);
   auth.token = data.token;
   auth.user = data.user;
+  if (data.user && data.user.organization) applyTheme(data.user.organization.theme);
   return data.user;
 }
 
@@ -41,6 +44,7 @@ export async function register(payload) {
   setToken(data.token);
   auth.token = data.token;
   auth.user = data.user;
+  if (data.user && data.user.organization) applyTheme(data.user.organization.theme);
   return data.user;
 }
 

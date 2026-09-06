@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.crypto import decrypt_str, encrypt_str, hmac_email
-from app.models import User
+from app.models import Organization, User
+from app.themes import serialize_org
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -29,13 +30,20 @@ def create_token(user_id: str, role: str) -> str:
     return jwt.encode(payload, get_settings().jwt_secret, algorithm="HS256")
 
 
-def user_public(user: User) -> dict:
-    return {
+def user_public(user: User, db: Session | None = None) -> dict:
+    data = {
         "id": user.id,
         "email": decrypt_str(user.email_enc),
         "name": decrypt_str(user.name_enc),
         "role": user.role,
+        "organization_id": user.organization_id,
+        "organization": None,
     }
+    if db is not None and user.organization_id:
+        org = db.query(Organization).filter(Organization.id == user.organization_id).first()
+        if org is not None:
+            data["organization"] = serialize_org(org)
+    return data
 
 
 def _hr_exists(db: Session) -> bool:
@@ -48,6 +56,8 @@ def _hr_exists(db: Session) -> bool:
 
 
 def register(db: Session, email: str, password: str, name: str, role: str) -> User:
+    if role not in ("hr", "candidate"):
+        role = "candidate"
     if role == "hr" and _hr_exists(db):
         role = "candidate"
     user = User(

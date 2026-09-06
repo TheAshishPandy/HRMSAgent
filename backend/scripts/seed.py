@@ -14,12 +14,13 @@ get_settings.cache_clear()
 from app import db as dbmod
 from app.db import Base, init_engine
 from app import models  # noqa: F401
-from app.models import User, Job, Application, Interview, Message
-from app.modules.auth.service import register
+from app.crypto import decrypt_str, encrypt_str, hmac_email
+from app.models import Employee, Organization, User, Job, Application, Interview, Message
+from app.modules.auth.service import hash_password, register
 from app.modules.jobs.service import create_job, set_status
+from app.themes import DEFAULT_MODULES
 from app.modules.candidates.service import apply_to_job
 from app.modules.calendar.service import create_interview
-from app.crypto import decrypt_str
 
 
 def main():
@@ -30,7 +31,60 @@ def main():
     if db.query(User).filter(User.role == "hr").first():
         print("already seeded")
         return
+    org = Organization(
+        name="Northstar Labs",
+        slug="northstar",
+        theme_key="corporate_blue",
+        layout_key="classic_sidebar",
+        modules=list(DEFAULT_MODULES),
+        status="active",
+    )
+    db.add(org)
+    db.flush()
+    admin = User(
+        email_enc=encrypt_str("admin@example.com"),
+        email_hash=hmac_email("admin@example.com"),
+        password_hash=hash_password("password"),
+        role="super_admin",
+        name_enc=encrypt_str("Ada Admin"),
+        timezone="UTC",
+    )
+    db.add(admin)
+    db.commit()
     hr = register(db, "hr@example.com", "password", "Pat HR", "hr")
+    hr.organization_id = org.id
+    db.add(Employee(
+        organization_id=org.id,
+        user_id=hr.id,
+        first_name="Pat",
+        last_name="HR",
+        email="hr@example.com",
+        department="People",
+        designation="Head of Talent",
+        status="active",
+        joining_date="2024-01-08",
+    ))
+    db.add(Employee(
+        organization_id=org.id,
+        first_name="Sam",
+        last_name="Lee",
+        email="sam.lee@example.com",
+        department="Engineering",
+        designation="Staff Engineer",
+        status="active",
+        joining_date="2023-04-12",
+    ))
+    db.add(Employee(
+        organization_id=org.id,
+        first_name="Riley",
+        last_name="Chen",
+        email="riley.chen@example.com",
+        department="Design",
+        designation="Product Designer",
+        status="active",
+        joining_date="2025-02-03",
+    ))
+    db.commit()
     j1 = create_job(db, hr.id, {
         "title": "Backend Engineer",
         "team": "Platform",
@@ -41,7 +95,7 @@ def main():
         "min_years": 3,
         "education": "bachelor",
         "narrative": "Build recruitment APIs and screening services.",
-    })
+    }, organization_id=org.id)
     j2 = create_job(db, hr.id, {
         "title": "Product Designer",
         "team": "Design",
@@ -52,7 +106,7 @@ def main():
         "min_years": 2,
         "education": "none",
         "narrative": "Shape the ATS experience for HR and candidates.",
-    })
+    }, organization_id=org.id)
     set_status(db, j1, "open")
     set_status(db, j2, "open")
     resumes = [
@@ -95,7 +149,7 @@ def main():
         related_id=iv.id,
         to_email=decrypt_str(cand.email_enc),
     )
-    print("seeded hr@example.com / password")
+    print("seeded admin@example.com / password and hr@example.com / password")
     db.close()
 
 

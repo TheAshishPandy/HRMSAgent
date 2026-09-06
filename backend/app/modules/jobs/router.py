@@ -28,13 +28,22 @@ def _is_hr(user: User | None) -> bool:
     return user is not None and user.role == "hr"
 
 
+def _job_for_hr(db: Session, job_id: str, user: User):
+    job = service.get_job(db, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if user.organization_id and job.organization_id and job.organization_id != user.organization_id:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+
 @router.post("")
 def create_job(
     body: schemas.JobCreate,
     user: User = Depends(require_hr),
     db: Session = Depends(get_db),
 ):
-    job = service.create_job(db, user.id, body.model_dump())
+    job = service.create_job(db, user.id, body.model_dump(), organization_id=user.organization_id)
     return serialize_job(job, hr=True)
 
 
@@ -44,7 +53,8 @@ def list_jobs(
     db: Session = Depends(get_db),
 ):
     hr = _is_hr(user)
-    jobs = service.list_jobs(db, hr=hr)
+    org_id = user.organization_id if hr and user is not None else None
+    jobs = service.list_jobs(db, hr=hr, organization_id=org_id)
     return [serialize_job(j, hr=hr) for j in jobs]
 
 
@@ -60,6 +70,8 @@ def get_one(
     hr = _is_hr(user)
     if not hr and job.status != "open":
         raise HTTPException(status_code=404, detail="Job not found")
+    if hr and user is not None and user.organization_id and job.organization_id and job.organization_id != user.organization_id:
+        raise HTTPException(status_code=404, detail="Job not found")
     return serialize_job(job, hr=hr)
 
 
@@ -70,9 +82,7 @@ def patch_job(
     user: User = Depends(require_hr),
     db: Session = Depends(get_db),
 ):
-    job = service.get_job(db, job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+    job = _job_for_hr(db, job_id, user)
     job = service.update_job(db, job, body.model_dump(exclude_unset=True))
     return serialize_job(job, hr=True)
 
@@ -83,9 +93,7 @@ def publish_job(
     user: User = Depends(require_hr),
     db: Session = Depends(get_db),
 ):
-    job = service.get_job(db, job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+    job = _job_for_hr(db, job_id, user)
     job = service.set_status(db, job, "open")
     return serialize_job(job, hr=True)
 
@@ -96,9 +104,7 @@ def close_job(
     user: User = Depends(require_hr),
     db: Session = Depends(get_db),
 ):
-    job = service.get_job(db, job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+    job = _job_for_hr(db, job_id, user)
     job = service.set_status(db, job, "closed")
     return serialize_job(job, hr=True)
 
@@ -109,9 +115,7 @@ def export_md(
     user: User = Depends(require_hr),
     db: Session = Depends(get_db),
 ):
-    job = service.get_job(db, job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+    job = _job_for_hr(db, job_id, user)
     return Response(content=job.jd_markdown, media_type="text/markdown")
 
 
@@ -121,9 +125,7 @@ def export_pdf(
     user: User = Depends(require_hr),
     db: Session = Depends(get_db),
 ):
-    job = service.get_job(db, job_id)
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+    job = _job_for_hr(db, job_id, user)
     from reportlab.lib.pagesizes import letter
     from reportlab.pdfgen import canvas
 
