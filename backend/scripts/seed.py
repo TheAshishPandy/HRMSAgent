@@ -15,7 +15,8 @@ from app import db as dbmod
 from app.db import Base, init_engine
 from app import models  # noqa: F401
 from app.crypto import decrypt_str, encrypt_str, hmac_email
-from app.models import Employee, LeaveBalance, LeaveRequest, LeaveType, Organization, User, Job, Application, Interview, Message
+from app.models import Employee, LeaveBalance, LeaveRequest, LeaveType, Organization, Payslip, PayrollRun, SalaryStructure, User, Job, Application, Interview, Message
+from app.modules.payroll.router import compute
 from app.modules.auth.service import hash_password, register
 from app.modules.jobs.service import create_job, set_status
 from app.themes import DEFAULT_MODULES
@@ -127,6 +128,37 @@ def main():
         reason="Family visit",
         status="pending",
     ))
+    salaries = {
+        "hr@example.com": (90000, 20000, 5000, 10, 500),
+        "sam.lee@example.com": (140000, 40000, 10000, 12, 800),
+        "riley.chen@example.com": (110000, 30000, 8000, 10, 400),
+    }
+    structures = {}
+    for emp in employees:
+        nums = salaries.get(emp.email)
+        if not nums:
+            continue
+        st = SalaryStructure(
+            organization_id=org.id,
+            employee_id=emp.id,
+            basic=nums[0],
+            hra=nums[1],
+            allowance=nums[2],
+            tax_percent=nums[3],
+            other_deductions=nums[4],
+        )
+        db.add(st)
+        structures[emp.id] = st
+    db.flush()
+    run = PayrollRun(organization_id=org.id, period="2026-08", status="processed")
+    db.add(run)
+    db.flush()
+    for emp in employees:
+        st = structures.get(emp.id)
+        if st is None:
+            continue
+        calc = compute(st, bonus=0)
+        db.add(Payslip(organization_id=org.id, run_id=run.id, employee_id=emp.id, period="2026-08", **calc))
     db.commit()
     j1 = create_job(db, hr.id, {
         "title": "Backend Engineer",

@@ -10,6 +10,7 @@
         <router-link to="/hr/employees">Employees</router-link>
         <router-link to="/hr/attendance">Attendance</router-link>
         <router-link to="/hr/leave">Leave</router-link>
+        <router-link to="/hr/payroll">Payroll</router-link>
         <router-link to="/hr/jobs">Jobs</router-link>
         <router-link to="/hr/calendar">Calendar</router-link>
         <router-link to="/hr/inbox">Inbox</router-link>
@@ -18,6 +19,7 @@
       <template v-else-if="isEmployee">
         <router-link to="/work">My work</router-link>
         <router-link to="/work/leave">Leave</router-link>
+        <router-link to="/work/payslips">Payslips</router-link>
       </template>
       <template v-else>
         <router-link to="/me">My applications</router-link>

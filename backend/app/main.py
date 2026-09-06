@@ -38,6 +38,7 @@ def create_app() -> FastAPI:
     from app.modules.employees.router import router as employees_router
     from app.modules.attendance.router import router as attendance_router
     from app.modules.leave.router import router as leave_router
+    from app.modules.payroll.router import router as payroll_router
 
     app.include_router(auth_router)
     app.include_router(jobs_router)
@@ -51,6 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(employees_router)
     app.include_router(attendance_router)
     app.include_router(leave_router)
+    app.include_router(payroll_router)
     return app
 
 

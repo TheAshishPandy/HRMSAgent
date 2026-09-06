@@ -126,6 +126,50 @@ class LeaveRequest(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
 
 
+class SalaryStructure(Base):
+    __tablename__ = "salary_structures"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False)
+    employee_id: Mapped[str] = mapped_column(String(36), ForeignKey("employees.id"), nullable=False)
+    basic: Mapped[float] = mapped_column(Float, nullable=False)
+    hra: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    allowance: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    tax_percent: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    other_deductions: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+
+class PayrollRun(Base):
+    __tablename__ = "payroll_runs"
+    __table_args__ = (UniqueConstraint("organization_id", "period"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False)
+    period: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+
+class Payslip(Base):
+    __tablename__ = "payslips"
+    __table_args__ = (UniqueConstraint("run_id", "employee_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False)
+    run_id: Mapped[str] = mapped_column(String(36), ForeignKey("payroll_runs.id"), nullable=False)
+    employee_id: Mapped[str] = mapped_column(String(36), ForeignKey("employees.id"), nullable=False)
+    period: Mapped[str] = mapped_column(String, nullable=False)
+    basic: Mapped[float] = mapped_column(Float, nullable=False)
+    hra: Mapped[float] = mapped_column(Float, nullable=False)
+    allowance: Mapped[float] = mapped_column(Float, nullable=False)
+    bonus: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    gross: Mapped[float] = mapped_column(Float, nullable=False)
+    tax: Mapped[float] = mapped_column(Float, nullable=False)
+    other_deductions: Mapped[float] = mapped_column(Float, nullable=False)
+    net: Mapped[float] = mapped_column(Float, nullable=False)
+
+
 class Job(Base):
     __tablename__ = "jobs"
 

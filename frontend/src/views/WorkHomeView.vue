@@ -17,7 +17,7 @@
         <p v-for="b in balances" :key="b.id">{{ b.leave_type_name }}: {{ b.remaining }}</p>
       </div>
     </div>
-    <p style="margin-top:24px"><router-link to="/work/leave">Apply for leave</router-link></p>
+    <p style="margin-top:24px"><router-link to="/work/leave">Apply for leave</router-link> · <router-link to="/work/payslips">Payslips</router-link></p>
   </div>
 </template>
 <script>
