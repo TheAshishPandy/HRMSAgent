@@ -15,7 +15,7 @@ from app import db as dbmod
 from app.db import Base, init_engine
 from app import models  # noqa: F401
 from app.crypto import decrypt_str, encrypt_str, hmac_email
-from app.models import Employee, Organization, User, Job, Application, Interview, Message
+from app.models import Employee, LeaveBalance, LeaveRequest, LeaveType, Organization, User, Job, Application, Interview, Message
 from app.modules.auth.service import hash_password, register
 from app.modules.jobs.service import create_job, set_status
 from app.themes import DEFAULT_MODULES
@@ -64,8 +64,20 @@ def main():
         status="active",
         joining_date="2024-01-08",
     ))
+    sam_user = User(
+        email_enc=encrypt_str("sam.lee@example.com"),
+        email_hash=hmac_email("sam.lee@example.com"),
+        password_hash=hash_password("password"),
+        role="employee",
+        name_enc=encrypt_str("Sam Lee"),
+        timezone="UTC",
+        organization_id=org.id,
+    )
+    db.add(sam_user)
+    db.flush()
     db.add(Employee(
         organization_id=org.id,
+        user_id=sam_user.id,
         first_name="Sam",
         last_name="Lee",
         email="sam.lee@example.com",
@@ -83,6 +95,37 @@ def main():
         designation="Product Designer",
         status="active",
         joining_date="2025-02-03",
+    ))
+    db.flush()
+    leave_defs = [("Annual", 20), ("Sick", 10), ("Casual", 5)]
+    types = []
+    for name, days in leave_defs:
+        lt = LeaveType(organization_id=org.id, name=name, days_per_year=days, paid=1)
+        db.add(lt)
+        types.append(lt)
+    db.flush()
+    year = datetime.now(timezone.utc).year
+    employees = db.query(Employee).filter(Employee.organization_id == org.id).all()
+    for emp in employees:
+        for lt in types:
+            db.add(LeaveBalance(
+                organization_id=org.id,
+                employee_id=emp.id,
+                leave_type_id=lt.id,
+                year=year,
+                remaining=float(lt.days_per_year),
+            ))
+    sam_emp = next(e for e in employees if e.email == "sam.lee@example.com")
+    annual = next(t for t in types if t.name == "Annual")
+    db.add(LeaveRequest(
+        organization_id=org.id,
+        employee_id=sam_emp.id,
+        leave_type_id=annual.id,
+        start_date="2026-09-14",
+        end_date="2026-09-16",
+        days=3,
+        reason="Family visit",
+        status="pending",
     ))
     db.commit()
     j1 = create_job(db, hr.id, {
@@ -149,7 +192,7 @@ def main():
         related_id=iv.id,
         to_email=decrypt_str(cand.email_enc),
     )
-    print("seeded admin@example.com / password and hr@example.com / password")
+    print("seeded admin@example.com, hr@example.com, sam.lee@example.com / password")
     db.close()
 
 

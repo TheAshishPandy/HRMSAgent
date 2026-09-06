@@ -8,10 +8,16 @@
       <template v-else-if="isHr">
         <router-link to="/hr">Dashboard</router-link>
         <router-link to="/hr/employees">Employees</router-link>
+        <router-link to="/hr/attendance">Attendance</router-link>
+        <router-link to="/hr/leave">Leave</router-link>
         <router-link to="/hr/jobs">Jobs</router-link>
         <router-link to="/hr/calendar">Calendar</router-link>
         <router-link to="/hr/inbox">Inbox</router-link>
         <router-link to="/hr/settings">Settings</router-link>
+      </template>
+      <template v-else-if="isEmployee">
+        <router-link to="/work">My work</router-link>
+        <router-link to="/work/leave">Leave</router-link>
       </template>
       <template v-else>
         <router-link to="/me">My applications</router-link>
@@ -31,7 +37,8 @@ export default {
   computed: {
     isHr() { return auth.user && auth.user.role === "hr"; },
     isAdmin() { return auth.user && auth.user.role === "super_admin"; },
-    home() { return this.isAdmin ? "/admin" : this.isHr ? "/hr" : "/me"; },
+    isEmployee() { return auth.user && auth.user.role === "employee"; },
+    home() { return this.isAdmin ? "/admin" : this.isHr ? "/hr" : this.isEmployee ? "/work" : "/me"; },
     brand() { return (auth.user && auth.user.organization && auth.user.organization.name) || "Northstar HRMS"; },
   },
   methods: {

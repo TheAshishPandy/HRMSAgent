@@ -30,6 +30,7 @@ Demo logins (password for all: `password`):
 
 - Super admin: `admin@example.com`
 - HR: `hr@example.com`
+- Employee: `sam.lee@example.com`
 - Candidates: `ada@example.com` and other seeded applicants
 
 Frontend:

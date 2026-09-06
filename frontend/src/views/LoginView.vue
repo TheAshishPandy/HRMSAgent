@@ -31,6 +31,7 @@ export default {
         const next = this.$route.query.next;
         if (next) this.$router.push(String(next));
         else if (u.role === "super_admin") this.$router.push("/admin");
+        else if (u.role === "employee") this.$router.push("/work");
         else this.$router.push(u.role === "hr" ? "/hr" : "/me");
       } catch (e) {
         this.error = "Invalid email or password";

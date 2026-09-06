@@ -11,7 +11,7 @@ export default {
   computed: {
     authedLayout() {
       const p = this.$route.path;
-      return p.startsWith("/hr") || p.startsWith("/me") || p.startsWith("/admin");
+      return p.startsWith("/hr") || p.startsWith("/me") || p.startsWith("/admin") || p.startsWith("/work");
     },
   },
 };
