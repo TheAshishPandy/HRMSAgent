@@ -20,11 +20,14 @@ export default {
   props: { apps: { type: Array, default: () => [] } },
   data() {
     return {
-      columns: ["applied", "screened", "interview", "offer", "rejected"],
+      columns: ["applied", "screened", "shortlist", "interview", "technical", "hr_round", "offer", "rejected"],
       labels: {
         applied: "Applied",
         screened: "Screened",
+        shortlist: "Shortlisted",
         interview: "Interview",
+        technical: "Technical",
+        hr_round: "HR round",
         offer: "Offer",
         rejected: "Rejected",
       },

@@ -7,3 +7,7 @@ class ParsedTextIn(BaseModel):
 
 class OverrideIn(BaseModel):
     decision: str
+
+
+class AdvanceIn(BaseModel):
+    status: str

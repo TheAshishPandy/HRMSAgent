@@ -117,7 +117,7 @@ label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--ink-s
 }
 .board {
   display: grid;
-  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  grid-template-columns: repeat(8, minmax(160px, 1fr));
   gap: 12px;
   overflow-x: auto;
 }

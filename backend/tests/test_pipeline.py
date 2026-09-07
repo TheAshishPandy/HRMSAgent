@@ -120,3 +120,21 @@ def test_offer_after_feedback(client, tmp_path, monkeypatch):
         headers={"Authorization": f"Bearer {login.json()['token']}"},
     )
     assert acc.json()["status"] == "hired"
+
+
+def test_shortlist_technical_hr_round(client, tmp_path, monkeypatch):
+    hr, app = _setup_screened(client, tmp_path, monkeypatch)
+    token = {"Authorization": f"Bearer {hr['token']}"}
+    sl = client.post(f"/api/applications/{app['id']}/advance", json={"status": "shortlist"}, headers=token)
+    assert sl.status_code == 200
+    assert sl.json()["status"] == "shortlist"
+    start = datetime(2026, 9, 4, 15, 0, tzinfo=timezone.utc)
+    client.post("/api/interviews", json={"application_id": app["id"], "start_at": start.isoformat()}, headers=token)
+    tech = client.post(f"/api/applications/{app['id']}/advance", json={"status": "technical"}, headers=token)
+    assert tech.status_code == 200
+    assert tech.json()["status"] == "technical"
+    hr_round = client.post(f"/api/applications/{app['id']}/advance", json={"status": "hr_round"}, headers=token)
+    assert hr_round.status_code == 200
+    assert hr_round.json()["status"] == "hr_round"
+    skip = client.post(f"/api/applications/{app['id']}/advance", json={"status": "shortlist"}, headers=token)
+    assert skip.status_code == 409

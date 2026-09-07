@@ -12,7 +12,7 @@ from app.deps import get_current_user, require_hr
 from app.errors import conflict
 from app.models import Application, Employee, Feedback, Interview, Job, Message, User
 from app.modules.audit import log_action
-from app.modules.candidates.schemas import OverrideIn, ParsedTextIn
+from app.modules.candidates.schemas import AdvanceIn, OverrideIn, ParsedTextIn
 from app.modules.candidates.service import apply_to_job, serialize_application
 from app.modules.jobs.service import get_job, serialize_job
 from app.modules.mail.service import send_template
@@ -199,6 +199,26 @@ def _has_feedback(db: Session, iv: Interview | None) -> bool:
     if iv is None:
         return False
     return db.query(Feedback).filter(Feedback.interview_id == iv.id).first() is not None
+
+
+@apps_router.post("/{app_id}/advance")
+def advance(app_id: str, body: AdvanceIn, user: User = Depends(require_hr), db: Session = Depends(get_db)):
+    app = _app_or_404(db, app_id)
+    if body.status not in ("shortlist", "interview", "technical", "hr_round"):
+        raise HTTPException(status_code=422, detail="Unsupported stage")
+    job = db.query(Job).filter(Job.id == app.job_id).first()
+    cand = db.query(User).filter(User.id == app.candidate_id).first()
+    iv = _latest_interview(db, app.id)
+    has_fb = _has_feedback(db, iv)
+    try:
+        transition(app.status, body.status, has_feedback=has_fb, has_interview=iv is not None)
+    except IllegalTransition as exc:
+        raise conflict(exc.code, exc.message)
+    app.status = body.status
+    db.commit()
+    db.refresh(app)
+    log_action(db, user.id, "status_change", "application", app.id, commit=True)
+    return serialize_application(app, job, cand, hr=True)
 
 
 @apps_router.post("/{app_id}/offer")

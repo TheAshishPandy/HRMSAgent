@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import PipelineBoard from "../components/PipelineBoard.vue";
 
 describe("PipelineBoard", () => {
-  it("renders five column headers", () => {
+  it("renders eight column headers", () => {
     const wrapper = mount(PipelineBoard, {
       props: {
         apps: [
@@ -13,7 +13,7 @@ describe("PipelineBoard", () => {
       },
     });
     const text = wrapper.text();
-    for (const h of ["Applied", "Screened", "Interview", "Offer", "Rejected"]) {
+    for (const h of ["Applied", "Screened", "Shortlisted", "Interview", "Technical", "HR round", "Offer", "Rejected"]) {
       expect(text).toContain(h);
     }
   });

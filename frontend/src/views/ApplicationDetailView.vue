@@ -42,6 +42,9 @@
           <button class="secondary" type="button" @click="sendFeedback(iv.id)">Save feedback</button>
         </div>
         <div class="row" style="margin-top:16px">
+          <button class="secondary" type="button" @click="advance('shortlist')">Shortlist</button>
+          <button class="secondary" type="button" @click="advance('technical')">Technical</button>
+          <button class="secondary" type="button" @click="advance('hr_round')">HR round</button>
           <button type="button" @click="decide('offer')">Send offer</button>
           <button class="danger" type="button" @click="decide('reject')">Reject</button>
         </div>
@@ -101,6 +104,18 @@ export default {
       this.error = "";
       try {
         await api("/api/applications/" + this.app.id + "/" + kind, { method: "POST" });
+        await this.reload();
+      } catch (e) {
+        this.error = (e.payload && e.payload.detail && e.payload.detail.message) || e.message;
+      }
+    },
+    async advance(status) {
+      this.error = "";
+      try {
+        await api("/api/applications/" + this.app.id + "/advance", {
+          method: "POST",
+          body: JSON.stringify({ status }),
+        });
         await this.reload();
       } catch (e) {
         this.error = (e.payload && e.payload.detail && e.payload.detail.message) || e.message;
