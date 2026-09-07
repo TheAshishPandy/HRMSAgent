@@ -3,11 +3,13 @@
     <router-view />
   </AppShell>
   <router-view v-else />
+  <SmartChat />
 </template>
 <script>
 import AppShell from "./components/AppShell.vue";
+import SmartChat from "./components/SmartChat.vue";
 export default {
-  components: { AppShell },
+  components: { AppShell, SmartChat },
   computed: {
     authedLayout() {
       const p = this.$route.path;

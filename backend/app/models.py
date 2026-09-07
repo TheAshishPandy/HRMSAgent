@@ -291,3 +291,55 @@ class RetentionSettings(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
     retention_days: Mapped[int] = mapped_column(Integer, nullable=False, default=365)
+
+
+class KnowledgeDocument(Base):
+    __tablename__ = "knowledge_documents"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False, default="faq")
+    body: Mapped[str] = mapped_column(String, nullable=False)
+    version: Mapped[str] = mapped_column(String, nullable=False, default="1.0")
+    language: Mapped[str] = mapped_column(String, nullable=False, default="en")
+    employee_visible: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    candidate_visible: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="published")
+    effective_date: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+
+class KnowledgeChunk(Base):
+    __tablename__ = "knowledge_chunks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    document_id: Mapped[str] = mapped_column(String(36), ForeignKey("knowledge_documents.id"), nullable=False)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False)
+    text: Mapped[str] = mapped_column(String, nullable=False)
+    section: Mapped[str] = mapped_column(String, nullable=False, default="")
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+
+class ChatConversation(Base):
+    __tablename__ = "chat_conversations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
+    organization_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String, nullable=False, default="New chat")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow, onupdate=_utcnow)
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    conversation_id: Mapped[str] = mapped_column(String(36), ForeignKey("chat_conversations.id"), nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False)
+    content: Mapped[str] = mapped_column(String, nullable=False)
+    agents: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    sources: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)

@@ -15,13 +15,14 @@ from app import db as dbmod
 from app.db import Base, init_engine
 from app import models  # noqa: F401
 from app.crypto import decrypt_str, encrypt_str, hmac_email
-from app.models import Employee, LeaveBalance, LeaveRequest, LeaveType, Organization, Payslip, PayrollRun, SalaryStructure, User, Job, Application, Interview, Message
+from app.models import Employee, KnowledgeDocument, LeaveBalance, LeaveRequest, LeaveType, Organization, Payslip, PayrollRun, SalaryStructure, User, Job, Application, Interview, Message
 from app.modules.payroll.router import compute
 from app.modules.auth.service import hash_password, register
 from app.modules.jobs.service import create_job, set_status
 from app.themes import DEFAULT_MODULES
 from app.modules.candidates.service import apply_to_job
 from app.modules.calendar.service import create_interview
+from app.modules.chat.rag import index_document
 
 
 def main():
@@ -159,6 +160,72 @@ def main():
             continue
         calc = compute(st, bonus=0)
         db.add(Payslip(organization_id=org.id, run_id=run.id, employee_id=emp.id, period="2026-08", **calc))
+    policies = [
+        (
+            "Leave Policy v3.2",
+            "leave",
+            "employee",
+            "Employees may carry forward up to 15 unused annual leave days into the next calendar year. "
+            "Casual leave cannot be carried forward. Sick leave requires a medical certificate after 2 consecutive days. "
+            "Employees may request leave only if remaining balance covers the weekday days requested. "
+            "Maximum consecutive annual leave without director approval is 10 days. "
+            "Leave requests must be submitted at least one working day in advance except for sick leave.",
+        ),
+        (
+            "Payroll Policy",
+            "payroll",
+            "employee",
+            "Salary is paid monthly in arrears. Gross pay is basic plus HRA plus allowance plus bonus. "
+            "Income tax is withheld as a percentage of gross. Other deductions such as benefits may apply. "
+            "Payslips are available in the employee portal after a payroll run is processed. "
+            "Questions about unexplained deductions should be raised with People Operations.",
+        ),
+        (
+            "Attendance Policy",
+            "attendance",
+            "employee",
+            "Standard working hours begin at 09:00 UTC. Check-in after 09:30 is marked late. "
+            "Employees should check in and out each working day. Remote work must be recorded as remote. "
+            "Unexplained absence without approved leave is marked absent.",
+        ),
+        (
+            "Employee Handbook",
+            "handbook",
+            "employee",
+            "Northstar Labs expects professional conduct, data confidentiality, and respectful collaboration. "
+            "The notice period for resignations is 30 days unless a contract states otherwise. "
+            "Joining documents include identity proof, bank details, and signed offer letter.",
+        ),
+        (
+            "Candidate Guidelines",
+            "recruitment",
+            "candidate",
+            "Candidates may request to reschedule an interview once if notice is given at least 24 hours in advance. "
+            "Joining documents required after offer: government ID, education certificates, and signed offer letter. "
+            "Application updates are sent through the candidate portal. Do not share interview links publicly.",
+        ),
+        (
+            "Code of Conduct",
+            "conduct",
+            "both",
+            "Harassment, discrimination, and unauthorized sharing of confidential data are prohibited. "
+            "Report concerns to People Operations. Retaliation against good-faith reports is not allowed.",
+        ),
+    ]
+    for title, category, vis, body in policies:
+        doc = KnowledgeDocument(
+            organization_id=org.id,
+            title=title,
+            category=category,
+            body=body,
+            version="1.0",
+            employee_visible=1 if vis in ("employee", "both") else 0,
+            candidate_visible=1 if vis in ("candidate", "both") else 0,
+            status="published",
+        )
+        db.add(doc)
+        db.flush()
+        index_document(db, doc)
     db.commit()
     j1 = create_job(db, hr.id, {
         "title": "Backend Engineer",
