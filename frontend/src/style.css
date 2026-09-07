@@ -83,6 +83,32 @@ label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--ink-s
   margin-bottom: 28px;
 }
 .main { padding: 32px 40px 80px; }
+.brand-logo { height: 28px; width: 28px; object-fit: contain; margin-right: 8px; vertical-align: middle; }
+.signout { margin-top: 24px; width: 100%; color: #e7dfd3; border-color: #57534e; }
+.shell[data-layout="compact_sidebar"] { grid-template-columns: 88px 1fr; }
+.shell[data-layout="compact_sidebar"] .nav a { text-align: center; font-size: 0.78rem; padding: 8px 4px; }
+.shell[data-layout="compact_sidebar"] .brand { font-size: 0.9rem; margin-bottom: 16px; }
+.shell[data-layout="top_nav"],
+.shell[data-layout="mobile_first"] { grid-template-columns: 1fr; }
+.shell[data-layout="top_nav"] .nav,
+.shell[data-layout="mobile_first"] .nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  align-items: center;
+  padding: 12px 20px;
+}
+.shell[data-layout="top_nav"] .brand,
+.shell[data-layout="mobile_first"] .brand { margin: 0 16px 0 0; }
+.shell[data-layout="top_nav"] .signout,
+.shell[data-layout="mobile_first"] .signout { margin: 0 0 0 auto; width: auto; }
+.shell[data-layout="enterprise"] { grid-template-columns: 300px 1fr; }
+.shell[data-layout="enterprise"] .nav { padding: 36px 28px; }
+.shell[data-layout="enterprise"] .brand { font-size: 1.7rem; }
+.shell[data-layout="modern_saas"] { grid-template-columns: 220px 1fr; gap: 16px; padding: 16px; }
+.shell[data-layout="modern_saas"] .nav { border-radius: var(--radius); }
+.shell[data-layout="modern_saas"] .main { padding: 24px 24px 80px; }
+.swatch { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--line); display: inline-block; }
 .card {
   background: var(--paper-2);
   border: 1px solid var(--line);

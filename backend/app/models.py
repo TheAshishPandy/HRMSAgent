@@ -43,6 +43,7 @@ class Organization(Base):
     layout_key: Mapped[str] = mapped_column(String, nullable=False, default="classic_sidebar")
     logo_url: Mapped[str | None] = mapped_column(String, nullable=True)
     modules: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    theme_overrides: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
 
 

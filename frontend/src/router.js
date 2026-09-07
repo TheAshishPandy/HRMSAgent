@@ -7,6 +7,7 @@ const routes = [
   { path: "/login", name: "login", component: () => import("./views/LoginView.vue") },
   { path: "/register", name: "register", component: () => import("./views/RegisterView.vue") },
   { path: "/admin", name: "admin-orgs", component: () => import("./views/AdminOrgsView.vue"), meta: { role: "super_admin" } },
+  { path: "/admin/studio", name: "admin-studio", component: () => import("./views/DesignStudioView.vue"), meta: { role: "super_admin" } },
   { path: "/hr", name: "hr-dash", component: () => import("./views/HrDashboard.vue"), meta: { role: "hr" } },
   { path: "/hr/employees", name: "hr-employees", component: () => import("./views/EmployeesView.vue"), meta: { role: "hr" } },
   { path: "/hr/attendance", name: "hr-attendance", component: () => import("./views/AttendanceView.vue"), meta: { role: "hr" } },

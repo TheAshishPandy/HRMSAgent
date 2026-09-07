@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.deps import require_super_admin
 from app.models import Organization, User
-from app.themes import DEFAULT_MODULES, THEMES, serialize_org
+from app.themes import ALL_MODULES, DEFAULT_MODULES, LAYOUT_KEYS, LAYOUTS, THEMES, THEME_OVERRIDE_KEYS, serialize_org
 
 router = APIRouter(prefix="/api/orgs", tags=["tenants"])
 
@@ -26,11 +26,22 @@ class OrgPatch(BaseModel):
     modules: list[str] | None = None
     status: str | None = None
     logo_url: str | None = None
+    theme_overrides: dict | None = None
 
 
 @router.get("/themes")
 def list_themes():
     return list(THEMES.values())
+
+
+@router.get("/layouts")
+def list_layouts():
+    return LAYOUTS
+
+
+@router.get("/modules")
+def list_modules():
+    return ALL_MODULES
 
 
 @router.get("")
@@ -44,6 +55,8 @@ def create_org(body: OrgIn, user: User = Depends(require_super_admin), db: Sessi
         raise HTTPException(status_code=409, detail={"code": "duplicate_slug", "message": "Slug in use"})
     if body.theme_key not in THEMES:
         raise HTTPException(status_code=422, detail="Unknown theme")
+    if body.layout_key not in LAYOUT_KEYS:
+        raise HTTPException(status_code=422, detail="Unknown layout")
     org = Organization(
         name=body.name,
         slug=body.slug,
@@ -66,6 +79,16 @@ def patch_org(org_id: str, body: OrgPatch, user: User = Depends(require_super_ad
     data = body.model_dump(exclude_unset=True)
     if "theme_key" in data and data["theme_key"] not in THEMES:
         raise HTTPException(status_code=422, detail="Unknown theme")
+    if "layout_key" in data and data["layout_key"] not in LAYOUT_KEYS:
+        raise HTTPException(status_code=422, detail="Unknown layout")
+    if "modules" in data and data["modules"] is not None:
+        unknown = [m for m in data["modules"] if m not in ALL_MODULES]
+        if unknown:
+            raise HTTPException(status_code=422, detail="Unknown module")
+    if "theme_overrides" in data and data["theme_overrides"] is not None:
+        data["theme_overrides"] = {
+            k: v for k, v in data["theme_overrides"].items() if k in THEME_OVERRIDE_KEYS and v
+        }
     for k, v in data.items():
         setattr(org, k, v)
     db.commit()

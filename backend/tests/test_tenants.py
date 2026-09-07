@@ -72,6 +72,36 @@ def test_super_admin_org_crud(client, db):
     assert patched.json()["theme_key"] == "dark_enterprise"
 
 
+def test_design_studio_layouts_and_overrides(client, db):
+    _, token = _user(db, "admin@example.com", "super_admin")
+    layouts = client.get("/api/orgs/layouts")
+    assert layouts.status_code == 200
+    keys = [item["key"] for item in layouts.json()]
+    assert "classic_sidebar" in keys
+    assert "top_nav" in keys
+    created = client.post("/api/orgs", json={
+        "name": "Studio Co", "slug": "studio", "theme_key": "glass", "layout_key": "modern_saas",
+    }, headers=_auth(token))
+    assert created.status_code == 200
+    assert created.json()["layout"]["key"] == "modern_saas"
+    org_id = created.json()["id"]
+    patched = client.patch(f"/api/orgs/{org_id}", json={
+        "layout_key": "top_nav",
+        "modules": ["dashboard", "payroll"],
+        "theme_overrides": {"primary": "#ff0000", "radius": "20px"},
+        "logo_url": "https://example.com/logo.png",
+    }, headers=_auth(token))
+    assert patched.status_code == 200
+    body = patched.json()
+    assert body["layout_key"] == "top_nav"
+    assert body["theme"]["primary"] == "#ff0000"
+    assert body["theme"]["radius"] == "20px"
+    assert body["modules"] == ["dashboard", "payroll"]
+    assert body["logo_url"] == "https://example.com/logo.png"
+    bad = client.patch(f"/api/orgs/{org_id}", json={"layout_key": "nope"}, headers=_auth(token))
+    assert bad.status_code == 422
+
+
 def test_hr_cannot_manage_orgs(client):
     r = client.post("/api/auth/register", json={
         "email": "hr@example.com", "password": "password", "name": "Pat", "role": "hr",

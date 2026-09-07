@@ -94,7 +94,75 @@ THEMES = {
         "font": "Source Sans 3, Segoe UI, sans-serif",
         "heading": "Source Sans 3, Segoe UI, sans-serif",
     },
+    "glass": {
+        "key": "glass",
+        "name": "Glass",
+        "primary": "#2563eb",
+        "secondary": "#0ea5e9",
+        "accent": "#67e8f9",
+        "background": "#e0f2fe",
+        "surface": "rgba(255,255,255,0.72)",
+        "text": "#0c4a6e",
+        "muted": "#0369a1",
+        "border": "#bae6fd",
+        "success": "#047857",
+        "warning": "#b45309",
+        "danger": "#be123c",
+        "info": "#0284c7",
+        "radius": "20px",
+        "font": "Source Sans 3, Segoe UI, sans-serif",
+        "heading": "Fraunces, Georgia, serif",
+    },
+    "executive": {
+        "key": "executive",
+        "name": "Executive",
+        "primary": "#92400e",
+        "secondary": "#1c1917",
+        "accent": "#d6ad60",
+        "background": "#f5f0e8",
+        "surface": "#fffdf8",
+        "text": "#1c1917",
+        "muted": "#57534e",
+        "border": "#e7e0d4",
+        "success": "#3f6b4f",
+        "warning": "#b45309",
+        "danger": "#9f1239",
+        "info": "#1d4ed8",
+        "radius": "10px",
+        "font": "Source Sans 3, Segoe UI, sans-serif",
+        "heading": "Fraunces, Georgia, serif",
+    },
+    "custom": {
+        "key": "custom",
+        "name": "Custom",
+        "primary": "#1d4ed8",
+        "secondary": "#0f172a",
+        "accent": "#38bdf8",
+        "background": "#f8fafc",
+        "surface": "#ffffff",
+        "text": "#0f172a",
+        "muted": "#64748b",
+        "border": "#e2e8f0",
+        "success": "#15803d",
+        "warning": "#b45309",
+        "danger": "#b91c1c",
+        "info": "#0369a1",
+        "radius": "12px",
+        "font": "Source Sans 3, Segoe UI, sans-serif",
+        "heading": "Fraunces, Georgia, serif",
+    },
 }
+
+LAYOUTS = [
+    {"key": "classic_sidebar", "name": "Classic Sidebar", "nav": "left"},
+    {"key": "compact_sidebar", "name": "Compact Sidebar", "nav": "left-compact"},
+    {"key": "top_nav", "name": "Top Navigation", "nav": "top"},
+    {"key": "enterprise", "name": "Enterprise", "nav": "left-wide"},
+    {"key": "modern_saas", "name": "Modern SaaS", "nav": "float"},
+    {"key": "mobile_first", "name": "Mobile First", "nav": "bottom"},
+]
+
+LAYOUT_KEYS = {item["key"] for item in LAYOUTS}
 
 DEFAULT_MODULES = [
     "dashboard",
@@ -106,9 +174,55 @@ DEFAULT_MODULES = [
     "chatbot",
 ]
 
+ALL_MODULES = [
+    "dashboard",
+    "employees",
+    "recruitment",
+    "attendance",
+    "leave",
+    "payroll",
+    "performance",
+    "training",
+    "documents",
+    "expense",
+    "assets",
+    "helpdesk",
+    "reports",
+    "analytics",
+    "chatbot",
+]
+
+THEME_OVERRIDE_KEYS = (
+    "primary",
+    "secondary",
+    "accent",
+    "background",
+    "surface",
+    "text",
+    "muted",
+    "border",
+    "success",
+    "warning",
+    "danger",
+    "info",
+    "radius",
+    "font",
+    "heading",
+)
+
+
+def resolve_theme(org) -> dict:
+    base = dict(THEMES.get(org.theme_key) or THEMES["corporate_blue"])
+    overrides = org.theme_overrides or {}
+    for key in THEME_OVERRIDE_KEYS:
+        if key in overrides and overrides[key]:
+            base[key] = overrides[key]
+    return base
+
 
 def serialize_org(org) -> dict:
-    theme = THEMES.get(org.theme_key) or THEMES["corporate_blue"]
+    theme = resolve_theme(org)
+    layout = next((item for item in LAYOUTS if item["key"] == org.layout_key), LAYOUTS[0])
     return {
         "id": org.id,
         "name": org.name,
@@ -117,6 +231,8 @@ def serialize_org(org) -> dict:
         "theme_key": org.theme_key,
         "layout_key": org.layout_key,
         "logo_url": org.logo_url,
-        "modules": org.modules or DEFAULT_MODULES,
+        "modules": org.modules or list(DEFAULT_MODULES),
+        "theme_overrides": org.theme_overrides or {},
         "theme": theme,
+        "layout": layout,
     }

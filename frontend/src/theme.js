@@ -1,4 +1,4 @@
-export function applyTheme(theme) {
+export function applyTheme(theme, layoutKey) {
   const root = document.documentElement;
   if (!theme) return;
   const map = {
@@ -20,4 +20,5 @@ export function applyTheme(theme) {
   Object.entries(map).forEach(([k, css]) => {
     if (theme[k]) root.style.setProperty(css, theme[k]);
   });
+  if (layoutKey) document.body.dataset.layout = layoutKey;
 }

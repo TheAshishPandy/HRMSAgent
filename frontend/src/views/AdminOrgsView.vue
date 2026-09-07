@@ -20,7 +20,7 @@
     </form>
     <table class="table">
       <thead>
-        <tr><th>Name</th><th>Slug</th><th>Theme</th><th>Status</th><th></th></tr>
+        <tr><th>Name</th><th>Slug</th><th>Theme</th><th>Layout</th><th>Status</th></tr>
       </thead>
       <tbody>
         <tr v-for="o in orgs" :key="o.id">
@@ -31,8 +31,8 @@
               <option v-for="t in themes" :key="t.key" :value="t.key">{{ t.name }}</option>
             </select>
           </td>
+          <td>{{ o.layout_key }}</td>
           <td><span class="pill">{{ o.status }}</span></td>
-          <td></td>
         </tr>
       </tbody>
     </table>

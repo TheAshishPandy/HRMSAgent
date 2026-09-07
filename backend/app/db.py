@@ -35,6 +35,10 @@ def migrate_sqlite(engine):
             cols = {c["name"] for c in insp.get_columns("jobs")}
             if "organization_id" not in cols:
                 conn.execute(text("ALTER TABLE jobs ADD COLUMN organization_id VARCHAR(36)"))
+        if "organizations" in tables:
+            cols = {c["name"] for c in insp.get_columns("organizations")}
+            if "theme_overrides" not in cols:
+                conn.execute(text("ALTER TABLE organizations ADD COLUMN theme_overrides JSON"))
 
 
 def init_engine():
