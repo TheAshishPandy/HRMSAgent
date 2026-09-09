@@ -18,6 +18,20 @@ TEMPLATES = {
         "Please apply again for future openings.\n",
     ),
     "generic": ("Message", "{body}"),
+    "onboarding_welcome": (
+        "Welcome aboard, {name}!",
+        "Hello {name},\n\n"
+        "Welcome to the team! You are joining as {designation} in {department}, "
+        "with a start date of {joining_date}.\n"
+        "Your onboarding checklist is now available in the employee portal. "
+        "Complete each task so People Operations can prepare your accounts and documents.\n",
+    ),
+    "offboarding_notice": (
+        "Offboarding notice",
+        "Hello {name},\n\n"
+        "This message confirms that your exit is being processed with an effective date of {exit_date}. "
+        "Reason: {reason}. Please return company assets and complete the exit checklist.\n",
+    ),
 }
 
 

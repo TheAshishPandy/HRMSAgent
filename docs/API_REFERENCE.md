@@ -130,8 +130,20 @@ Legend — required role:
 | Method | Path | Role | Purpose |
 | --- | --- | --- | --- |
 | GET | `/messages` | auth | Own inbox messages |
+| GET | `/messages/unread-count` | auth | `{unread}` count |
 | POST | `/messages/{id}/read` | auth | Mark read |
 | POST | `/messages/{id}/retry-smtp` | hr | Retry SMTP delivery |
+
+## Onboarding (`/api/onboarding`)
+
+| Method | Path | Role | Purpose |
+| --- | --- | --- | --- |
+| GET | `/onboarding/eligible` | hr | Hired applications without an onboarding record |
+| POST | `/onboarding` | hr | Create employee + joining checklist from a hired application |
+| GET | `/onboarding` | staff | Org onboarding records + task progress |
+| GET | `/onboarding/me` | auth | Caller's own onboarding record |
+| POST | `/onboarding/tasks/{id}/complete` | auth | Mark a checklist task done (owner or staff) |
+| POST | `/onboarding/employees/{id}/offboard` | hr | Set employee inactive with exit date/reason |
 
 ## Interview feedback (`/api/feedback`)
 

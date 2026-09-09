@@ -15,7 +15,7 @@ from app import db as dbmod
 from app.db import Base, init_engine
 from app import models  # noqa: F401
 from app.crypto import decrypt_str, encrypt_str, hmac_email
-from app.models import Employee, KnowledgeDocument, LeaveBalance, LeaveRequest, LeaveType, Organization, Payslip, PayrollRun, SalaryStructure, User, Job, Application, Interview, Message
+from app.models import Employee, Feedback, KnowledgeDocument, LeaveBalance, LeaveRequest, LeaveType, Organization, Payslip, PayrollRun, SalaryStructure, User, Job, Application, Interview, Message
 from app.modules.payroll.router import compute
 from app.modules.auth.service import hash_password, register
 from app.modules.jobs.service import create_job, set_status
@@ -25,12 +25,69 @@ from app.modules.calendar.service import create_interview
 from app.modules.chat.rag import index_document
 
 
+def ensure_demo_hiring(db):
+    org = db.query(Organization).filter(Organization.slug == "northstar").first()
+    if org is None:
+        return
+    hr = db.query(User).filter(User.role == "hr", User.organization_id == org.id).first()
+    cand = db.query(User).filter(User.email_hash == hmac_email("eli@example.com")).first()
+    if cand is None or hr is None:
+        return
+    if cand.role == "employee":
+        return
+    job_ids = [row[0] for row in db.query(Job.id).filter(Job.organization_id == org.id).all()]
+    apps = (
+        db.query(Application)
+        .filter(Application.candidate_id == cand.id, Application.job_id.in_(job_ids))
+        .order_by(Application.created_at.desc())
+        .all()
+    )
+    hired = [a for a in apps if a.status == "hired"]
+    if hired:
+        return
+    app = apps[0] if apps else None
+    if app is None:
+        return
+    iv = (
+        db.query(Interview)
+        .filter(Interview.application_id == app.id, Interview.status != "cancelled")
+        .first()
+    )
+    if iv is None:
+        from datetime import datetime, timezone, timedelta
+
+        now = datetime.now(timezone.utc)
+        start = now - timedelta(days=2)
+        iv = Interview(
+            application_id=app.id,
+            start_at=start,
+            end_at=start + timedelta(minutes=45),
+            timezone="UTC",
+            source="local",
+            status="confirmed",
+        )
+        db.add(iv)
+        db.flush()
+    if not db.query(Feedback).filter(Feedback.interview_id == iv.id).first():
+        db.add(Feedback(
+            interview_id=iv.id,
+            hr_id=hr.id,
+            rating=4,
+            notes="Strong technical match; offered the Backend Engineer role.",
+        ))
+    app.status = "hired"
+    db.commit()
+    print("demo hire ready: eli@example.com -> hired (eligible for onboarding)")
+
+
 def main():
     Path("data/resumes").mkdir(parents=True, exist_ok=True)
     engine = init_engine()
     Base.metadata.create_all(engine)
+    dbmod.migrate_sqlite(engine)
     db = dbmod.SessionLocal()
     if db.query(User).filter(User.role == "hr").first():
+        ensure_demo_hiring(db)
         print("already seeded")
         return
     org = Organization(
@@ -292,6 +349,7 @@ def main():
         to_email=decrypt_str(cand.email_enc),
     )
     print("seeded admin@example.com, hr@example.com, sam.lee@example.com / password")
+    ensure_demo_hiring(db)
     db.close()
 
 

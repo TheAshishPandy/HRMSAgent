@@ -14,11 +14,12 @@ The system is fully functional end to end: FastAPI + SQLAlchemy backend, Vue 3 s
 | --- | --- |
 | Multi-tenancy | Organizations, org-scoped isolation at the query layer, org branding/theme/layout |
 | Auth & RBAC | Email+password, JWT; roles `super_admin`, `hr`, `employee`, `candidate` |
-| Employees | People directory CRUD, department/designation, manager link, active status |
+| Employees | People directory CRUD, department/designation, manager link, active/inactive, joining + exit |
 | Attendance | Daily check-in / check-out, present/late/absent board, HR corrections |
 | Leave | Leave types, per-year balances, apply, weekday calculation, HR approve/reject |
 | Payroll | Salary structures, monthly runs, payslips (gross/tax/net), process runs |
-| Recruitment (ATS) | Jobs + JD generation/export, public apply with resume, keyword + optional LLM screening, 8-stage pipeline (applied → rejected/offer), interviews, feedback, offers, in-app inbox, GDPR export/delete |
+| Recruitment (ATS) | Jobs + JD generation/export, public apply with resume, keyword + optional LLM screening, 8-stage pipeline (applied → hired/rejected), interviews, feedback, offers, in-app inbox, GDPR export/delete |
+| Onboarding | Hired candidate → employee + joining checklist + welcome message; HR offboarding with exit date/reason |
 | Calendar | Working hours, availability blocks, interview slot picker, weekday guard |
 | Design studio | 8 themes, 6 layouts, toggleable modules, theme overrides per org |
 | Smart Chat | Floating AI copilot with context resolver, agent router, hybrid RAG over HR policies, live leave/payroll/attendance/application tools, source citations |
@@ -28,8 +29,8 @@ The system is fully functional end to end: FastAPI + SQLAlchemy backend, Vue 3 s
 | Role | Access |
 | --- | --- |
 | `super_admin` | All orgs; manage organizations + design studio |
-| `hr` | Org-scoped staff: employees, attendance, leave, payroll, recruitment, documents, chat |
-| `employee` | `/work` portal: own attendance, leave balance/apply, payslips, chat |
+| `hr` | Org-scoped staff: employees, onboarding, attendance, leave, payroll, recruitment, documents, chat |
+| `employee` | `/work` portal: own attendance, onboarding checklist, leave, payslips, inbox, chat |
 | `candidate` | `/me` portal: own applications, interviews, offers, chat |
 
 Registration can create the first `hr`; later registrations default to `candidate`. `super_admin` and `employee` are created via seed or by an org admin.
@@ -50,6 +51,7 @@ backend/
       auth/          register, login, /me
       tenants/       organizations, themes, layouts, modules
       employees/     people directory
+      onboarding/    hire checklist + offboarding
       attendance/    check-in/out, daily board, corrections
       leave/         types, balances, requests, decisions
       payroll/       structures, runs, payslips
@@ -111,7 +113,7 @@ The Vite dev server already allows `*.monkeycode-ai.live` hosts for preview.
 | `sam.lee@example.com` | employee |
 | `ada@example.com` ... | candidates seeded with applications |
 
-Seed data also creates leave types and balances, an August 2026 payroll run + payslips, two open jobs with pipeline applications, and a set of HR policy documents used by Smart Chat.
+Seed data also creates leave types and balances, an August 2026 payroll run + payslips, two open jobs with pipeline applications, HR policy documents for Smart Chat, and a demo hire (`eli@example.com`, hired Backend Engineer) ready for onboarding.
 
 ## Testing
 

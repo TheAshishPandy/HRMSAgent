@@ -24,15 +24,15 @@ Super admins create organizations and configure each one's identity:
 Email+password with bcrypt hashing; PII encrypted at rest (Fernet). Roles gate both API access and frontend routes:
 
 - `super_admin` → organization administration + design studio.
-- `hr` → People, Attendance, Leave, Payroll, Jobs/Pipeline, Calendar, Inbox, Smart Chat, Settings.
-- `employee` → My work (check-in/out), Leave, Payslips, Smart Chat.
+- `hr` → People, Onboarding, Attendance, Leave, Payroll, Jobs/Pipeline, Calendar, Inbox, Smart Chat, Settings.
+- `employee` → My work (check-in/out), Onboarding checklist, Leave, Payslips, Inbox, Smart Chat.
 - `candidate` → My applications, Inbox, Smart Chat, Open roles.
 
 ## 3. Employees (People directory)
 
 **Roles:** staff (manage) · **Screens:** `/hr/employees`
 
-Directory CRUD per org: name, email, department, designation, manager, status (active), joining date. Employees link to a `User` so they can sign in to the `/work` portal.
+Directory CRUD per org: name, email, department, designation, manager, status (active/inactive), joining date, exit date/reason. Employees link to a `User` so they can sign in to the `/work` portal. HR can offboard an active employee from this screen.
 
 ## 4. Attendance
 
@@ -78,13 +78,24 @@ The most developed module. Public open roles list + detail; applying uploads a r
 
 Job JD generation and Markdown/PDF export are available in the HR job editor.
 
-## 8. Design studio
+## 8. Onboarding / offboarding
+
+**Roles:** hr (start + track), employee (complete checklist) · **Screens:** `/hr/onboarding`, `/work/onboarding`, `/hr/employees`
+
+- **Eligible hires** — applications in `hired` (offer accepted) that do not yet have an onboarding record.
+- **Start onboarding** — HR sets department, designation, joining date. Creates the employee profile, converts the candidate account to `employee`, seeds leave balances, writes a joining checklist, and sends a welcome inbox message.
+- **Checklist** — default tasks: offer letter, government ID, bank details, IT/laptop, HR induction. Employee or HR marks tasks done; the record auto-completes when every task is done.
+- **Offboarding** — HR sets exit date + reason on an active employee; status becomes `inactive` and an inbox notice is sent.
+
+Demo seed includes `eli@example.com` already hired for Backend Engineer so HR can start onboarding immediately.
+
+## 9. Design studio
 
 **Roles:** `super_admin` · **Screens:** `/admin/studio`
 
 Pick an org, then set its theme, layout, module set, and raw token overrides. The org's branding is applied to every user in that org after login via CSS custom properties.
 
-## 9. Smart Chat (AI copilot)
+## 10. Smart Chat (AI copilot)
 
 **Roles:** workforce + candidate (floating widget on all signed-in pages) · **Screens:** embedded in `App.vue`
 
@@ -100,11 +111,10 @@ HR can manage org policy documents under the chat's `/api/chat/documents` endpoi
 
 See `docs/SMART_CHAT.md` for architecture and behavior guarantees.
 
-## 10. Not implemented yet
+## 11. Not implemented yet
 
 The following SmartHRMS spec areas are **not built** in this repo today and are the primary extension backlog:
 
-- Onboarding / offboarding workflows
 - Performance management (appraisals, goals, 360)
 - Learning & development / training
 - Document management center (beyond chat policy docs) & compliance

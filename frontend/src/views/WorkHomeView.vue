@@ -15,6 +15,18 @@
       <div class="card">
         <h2>Leave balance</h2>
         <p v-for="b in balances" :key="b.id">{{ b.leave_type_name }}: {{ b.remaining }}</p>
+        <p v-if="!balances.length" class="muted">No leave types assigned yet</p>
+      </div>
+      <div v-if="onboarding" class="card">
+        <h2>Onboarding</h2>
+        <p>{{ onboarding.completed_tasks }}/{{ onboarding.tasks_total }} tasks · {{ onboarding.status }}</p>
+        <p class="muted">{{ onboarding.job_title }} · joins {{ onboarding.joining_date || "TBD" }}</p>
+        <router-link to="/work/onboarding">Open checklist</router-link>
+      </div>
+      <div class="card">
+        <h2>Inbox</h2>
+        <p class="muted">Welcome notes, offers, and exit notices land here.</p>
+        <router-link to="/work/inbox">Open inbox</router-link>
       </div>
     </div>
     <p style="margin-top:24px"><router-link to="/work/leave">Apply for leave</router-link> · <router-link to="/work/payslips">Payslips</router-link></p>
@@ -23,12 +35,25 @@
 <script>
 import { api } from "../api";
 export default {
-  data: () => ({ today: null, balances: [], msg: "" }),
+  data: () => ({ today: null, balances: [], msg: "", onboarding: null }),
   async created() {
-    const rows = await api("/api/attendance/me");
-    const day = new Date().toISOString().slice(0, 10);
-    this.today = rows.find((r) => r.work_date === day) || null;
-    this.balances = await api("/api/leave/balances");
+    try {
+      const rows = await api("/api/attendance/me");
+      const day = new Date().toISOString().slice(0, 10);
+      this.today = rows.find((r) => r.work_date === day) || null;
+    } catch (e) {
+      this.msg = e.message || "Could not load attendance";
+    }
+    try {
+      this.balances = await api("/api/leave/balances");
+    } catch (e) {
+      this.balances = [];
+    }
+    try {
+      this.onboarding = await api("/api/onboarding/me");
+    } catch (e) {
+      this.onboarding = null;
+    }
   },
   methods: {
     fmt(v) { return v ? new Date(v).toLocaleTimeString() : ""; },

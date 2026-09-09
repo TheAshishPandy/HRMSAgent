@@ -38,6 +38,12 @@ def list_messages(user: User = Depends(get_current_user), db: Session = Depends(
     return [_ser(m) for m in rows]
 
 
+@router.get("/unread-count")
+def unread_count(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    n = db.query(Message).filter(Message.to_user_id == user.id, Message.read_at.is_(None)).count()
+    return {"unread": n}
+
+
 @router.post("/{message_id}/read")
 def mark_read(message_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     m = db.query(Message).filter(Message.id == message_id, Message.to_user_id == user.id).first()

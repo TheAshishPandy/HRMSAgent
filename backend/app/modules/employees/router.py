@@ -30,6 +30,8 @@ def _ser(e: Employee) -> dict:
         "designation": e.designation,
         "status": e.status,
         "joining_date": e.joining_date,
+        "exit_date": e.exit_date,
+        "exit_reason": e.exit_reason,
         "user_id": e.user_id,
     }
 

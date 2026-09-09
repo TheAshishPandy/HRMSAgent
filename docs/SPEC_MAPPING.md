@@ -21,7 +21,7 @@ The repo deliberately keeps its own pragmatic stack (**FastAPI + Vue 3 + SQLite*
 | 14 Leave | built | Types, balances, apply, approve/reject |
 | 15 Payroll | built | Structures, monthly runs, payslips |
 | 16 Recruitment | built | Full ATS (see MODULES §7) |
-| 17 Onboarding | gap | Not built |
+| 17 Onboarding | built | Hire → employee + joining checklist + welcome message; HR offboarding with exit date |
 | 18 Performance | gap | Module toggle reserved only |
 | 19 Learning & development | gap | Module toggle reserved only |
 | 20 Document management | partial | Knowledge/policy documents for chat only; no employee document center |
@@ -30,7 +30,7 @@ The repo deliberately keeps its own pragmatic stack (**FastAPI + Vue 3 + SQLite*
 | 23 Helpdesk | gap | Not built |
 | 24 Travel & expense | gap | Not built |
 | 25 Workflow engine | gap | Fixed pipeline transitions only; no generic workflow/approval engine |
-| 26 Notifications | partial | In-app inbox + optional SMTP; no WebSocket/live push |
+| 26 Notifications | partial | In-app inbox + unread badge + optional SMTP; no WebSocket/live push |
 | 27 Search system | partial | Chat RAG search; no global people search across modules |
 
 ## AI / Smart Chat
@@ -74,7 +74,7 @@ The repo deliberately keeps its own pragmatic stack (**FastAPI + Vue 3 + SQLite*
 
 ## Highest-value gaps (extension backlog)
 
-1. **Onboarding / offboarding** and **document center** (employee documents + compliance) — reuse org-scoped `KnowledgeDocument` pattern.
+1. **Document center** (employee documents + compliance) — reuse org-scoped `KnowledgeDocument` pattern.
 2. **Workflow engine + approvals** — generalize the pipeline-transition approach for leave/expense/asset approvals.
 3. **Notifications via WebSocket** — event bus alongside in-app inbox.
 4. **Manager role / portal** — people queries and team views for `manager_id`.

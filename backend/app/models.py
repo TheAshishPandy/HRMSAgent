@@ -70,6 +70,39 @@ class Employee(Base):
     manager_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     status: Mapped[str] = mapped_column(String, nullable=False, default="active")
     joining_date: Mapped[str | None] = mapped_column(String, nullable=True)
+    exit_date: Mapped[str | None] = mapped_column(String, nullable=True)
+    exit_reason: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+
+class Onboarding(Base):
+    __tablename__ = "onboardings"
+    __table_args__ = (UniqueConstraint("application_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False)
+    employee_id: Mapped[str] = mapped_column(String(36), ForeignKey("employees.id"), nullable=False)
+    application_id: Mapped[str] = mapped_column(String(36), ForeignKey("applications.id"), nullable=False)
+    department: Mapped[str] = mapped_column(String, nullable=False, default="")
+    designation: Mapped[str] = mapped_column(String, nullable=False, default="")
+    joining_date: Mapped[str | None] = mapped_column(String, nullable=True)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="active")
+    tasks_total: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    completed_tasks: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
+
+
+class OnboardingTask(Base):
+    __tablename__ = "onboarding_tasks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    onboarding_id: Mapped[str] = mapped_column(String(36), ForeignKey("onboardings.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False, default="")
+    completed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    completed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=_utcnow)
 
 
